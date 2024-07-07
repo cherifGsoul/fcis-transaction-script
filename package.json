@@ -1,0 +1,22 @@
+{
+  "name": "transaction-script",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/lodash.clone": "^4.5.9",
+    "@types/lodash.merge": "^4.6.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "hono": "^4.2.9",
+    "lodash.clone": "^4.5.0",
+    "lodash.merge": "^4.6.2",
+    "pg": "^8.11.5"
+  }
+}

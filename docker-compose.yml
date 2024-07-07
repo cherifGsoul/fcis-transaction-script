@@ -1,0 +1,15 @@
+# Set the version of docker compose to use
+version: '3.9'
+
+# The containers that compose the project
+services:
+  db:
+    image: postgres:13
+    restart: always
+    container_name: quizr-integration-tests
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: quizr
+      POSTGRES_PASSWORD: quizr
+      POSTGRES_DB: quizr
