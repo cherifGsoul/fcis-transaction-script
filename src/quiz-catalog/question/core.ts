@@ -1,7 +1,7 @@
 export enum Commands {
   CREATE_QUESTION = "CREATE_QUESTION",
   UPDATE_QUESTION = "UPDATE_QUESTION",
-}
+};
 
 export type Command<
   Name extends string = string,
@@ -63,12 +63,12 @@ export type InsertQuestion = Action<
   QuestionData
 >
 
-type UpdateQuestion = Action<
+export type UpdateQuestion = Action<
   Actions.UPDATE_QUESTION,
   QuestionData
 >
 
-type InsertAnswerOptions = Action<
+export type InsertAnswerOptions = Action<
   Actions.INSERT_ANSWER_OPTIONS,
   AnswerOptionsData
 >
@@ -78,7 +78,7 @@ export type UpdateAnswerOptions = Action<
   AnswerOptionsData
 >
 
-type RemoveAnswerOptions = Action<
+export type RemoveAnswerOptions = Action<
   Actions.REMOVE_ANSWER_OPTIONS,
   AnswerOptionsData
 >
@@ -108,12 +108,12 @@ type Spec = {
   ) => QuestionAction;
 };
 
-const insertQuestionSpec: Spec = {
+const updateQuestionSpec: Spec = {
     isSatisfiedBy: (updatedQuestion, newQuestion) =>
       updatedQuestion.id === newQuestion.id &&
       updatedQuestion.prompt !== newQuestion.prompt,
     action: (newQuestion) => ({
-      name: Actions.INSERT_QUESTION,
+      name: Actions.UPDATE_QUESTION,
       data: {
         id: newQuestion.id,
         prompt: newQuestion.prompt,
@@ -141,7 +141,7 @@ const removeAnswerOptionsSpec: Spec = {
     name: Actions.REMOVE_ANSWER_OPTIONS,
     data: {questionId: newQuestion.id, answerOptions: removedAnswerOptions}
   })
-}
+};
 
 const updateAnswerOptionsSpec: Spec = {
   isSatisfiedBy: (
@@ -162,7 +162,7 @@ const updateAnswerOptionsSpec: Spec = {
 }
 
 const specs: Spec[] = [
-  insertQuestionSpec,
+  updateQuestionSpec,
   insertAnswerOptionsSpec,
   removeAnswerOptionsSpec,
   updateAnswerOptionsSpec,
@@ -199,7 +199,6 @@ export const handle: Handle = (command: QuestionCommand, question?: Question.t) 
   
   throw new Error("can not process the command");
 }
-
 
 const handleCreateQuestion = (command: CreateQuestionCommand): QuestionAction[] => {
   const question: Question.t = {
@@ -251,7 +250,6 @@ const handleUpdateQuestion = (command: UpdateQuestionCommand, updatedQuestion: Q
       (oldAO.answer !== newAO.answer || oldAO.correct !== newAO.correct)
     );
   });
-
 
   return specs.reduce((actions, spec) => {
     if (

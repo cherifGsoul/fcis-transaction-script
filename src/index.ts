@@ -5,8 +5,8 @@ import {Database} from "bun:sqlite"
 type Bindings = {
   db: Database
 }
-const app = new Hono<{Bindings: Bindings}>()
 
+const app = new Hono<{Bindings: Bindings}>()
 
 app.route("/questions", questions)
 

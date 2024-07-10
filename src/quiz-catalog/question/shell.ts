@@ -1,29 +1,38 @@
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { kyselyDb } from "../../config/db";
-import { Actions, AnswerOption, AnswerOptionData, Commands, handle, Question, QuestionCommand, QuestionId } from "./core";
+import { Actions, AnswerOption, AnswerOptionData, Commands, handle, Question, QuestionCommand, QuestionId, QuestionData } from "./core";
+import { answerOptions } from "../../config/schema";
+
+export const handleGetQuestion = async (id: string): Promise<QuestionData> =>  {
+  const kyselyQuestion = await kyselyDb
+    .selectFrom("questions")
+    .where("id", "=", id)
+    .selectAll("questions")
+    .select((eb) => [
+      jsonArrayFrom(
+        eb.selectFrom('answerOptions')
+        .select(['answerOptions.id', 'answerOptions.answer', 'answerOptions.correct'])
+        .whereRef('answerOptions.question_id', '=', 'questions.id')
+        .orderBy('answerOptions.id')
+      ).as("answerOptions")
+    ]).executeTakeFirstOrThrow()
+    return {
+      id: kyselyQuestion.id,
+      prompt: kyselyQuestion.prompt,
+      answerOptions: kyselyQuestion.answerOptions
+    }
+}
 
 export const handleQuestionCommand = async (command: QuestionCommand): Promise<void> => {
   let question: Question.t | undefined
 
   // I/O
   if (command.name !== Commands.CREATE_QUESTION) {
-    const kyselyQuestion = await kyselyDb
-      .selectFrom("questions")
-      .where("id", "=", command.data.id)
-      .selectAll("questions")
-      .select((eb) => [
-        jsonArrayFrom(
-          eb.selectFrom('answerOptions')
-          .select(['answerOptions.id', 'answerOptions.answer', 'answerOptions.correct'])
-          .whereRef('answerOptions.question_id', '=', 'questions.id')
-          .orderBy('answerOptions.id')
-        ).as("answerOptions")
-      ]).executeTakeFirstOrThrow()
-
+      const questionData = await handleGetQuestion(command.data.id)
       question = {
-        id: kyselyQuestion.id as QuestionId.t,
-        prompt: kyselyQuestion.prompt,
-        answerOptions: kyselyQuestion.answerOptions.map((ao) => {
+        id: questionData.id as QuestionId.t,
+        prompt: questionData.prompt,
+        answerOptions: questionData.answerOptions.map((ao) => {
           return {
             id: ao.id,
             answer: ao.answer,
