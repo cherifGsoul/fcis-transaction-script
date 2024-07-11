@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { validator } from 'hono/validator'
 import { handleGetQuestion, handleQuestionCommand } from "../../quiz-catalog";
-import type { CreateQuestionCommand, UpdateQuestionCommand, Commands } from "../../quiz-catalog";
+import type { CreateQuestionCommand, UpdateQuestionCommand } from "../../quiz-catalog";
+import { Commands } from "../../quiz-catalog"
 import { z } from 'zod'
 import { AnswerOptionData } from "../../quiz-catalog/question/core";
 
@@ -28,12 +29,14 @@ questions.get("/:id", async (c) => {
 });
 
 questions.post(
-  "/:id",
+  "/",
   validator("json", (value, c) => {
     const parsed = questionSchema.safeParse(value)
+    console.log(parsed)
     if (!parsed.success) {
-
+      console.log(parsed.error)
     }
+    console.log(parsed.data)
     return parsed.data;
   }),
   async (c) => {
