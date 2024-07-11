@@ -1,41 +1,49 @@
+/**
+ * Commands
+ * Inputs represented as Commands
+ */
 export enum Commands {
-  CREATE_QUESTION = "CREATE_QUESTION",
-  UPDATE_QUESTION = "UPDATE_QUESTION",
-};
+  CREATE_QUESTION = 'CREATE_QUESTION',
+  UPDATE_QUESTION = 'UPDATE_QUESTION',
+}
 
 export type Command<
   Name extends string = string,
-  Data extends Record<string, unknown> = Record<string, unknown>
+  Data extends Record<string, unknown> = Record<string, unknown>,
 > = Readonly<{
   name: Name;
   data: Data;
-}>
+}>;
 
-type QuestionCommandData = QuestionData & { answerOptions: AnswerOptionData[] }
+type QuestionCommandData = QuestionData & { answerOptions: AnswerOptionData[] };
 
 export type CreateQuestionCommand = Command<
   Commands.CREATE_QUESTION,
   QuestionCommandData
->
+>;
 
 export type UpdateQuestionCommand = Command<
   Commands.UPDATE_QUESTION,
   QuestionCommandData
->
+>;
 
 export type QuestionCommand = CreateQuestionCommand | UpdateQuestionCommand;
 
+/**
+ * The decided actions
+ * Outputs represented as I/O actions
+ */
 export enum Actions {
-  INSERT_QUESTION = "INSERT_QUESTION",
-  UPDATE_QUESTION = "UPDATE_QUESTION",
-  INSERT_ANSWER_OPTIONS = "INSERT_ANSWER_OPTIONS",
-  UPDATE_ANSWER_OPTIONS = "UPDATE_ANSWER_OPTIONS",
-  REMOVE_ANSWER_OPTIONS= "REMOVE_ANSWER_OPTIONS",
-};
+  INSERT_QUESTION = 'INSERT_QUESTION',
+  UPDATE_QUESTION = 'UPDATE_QUESTION',
+  INSERT_ANSWER_OPTIONS = 'INSERT_ANSWER_OPTIONS',
+  UPDATE_ANSWER_OPTIONS = 'UPDATE_ANSWER_OPTIONS',
+  REMOVE_ANSWER_OPTIONS = 'REMOVE_ANSWER_OPTIONS',
+}
 
 export type Action<
   Name extends string = string,
-  Data extends Record<string, unknown> = Record<string, unknown>
+  Data extends Record<string, unknown> = Record<string, unknown>,
 > = Readonly<{
   name: Name;
   data: Data;
@@ -44,7 +52,7 @@ export type Action<
 export type QuestionData = {
   id: string;
   prompt: string;
-  answerOptions: AnswerOptionData[]
+  answerOptions: AnswerOptionData[];
 };
 
 export type AnswerOptionData = {
@@ -58,40 +66,47 @@ export type AnswerOptionsData = {
   answerOptions: AnswerOptionData[];
 };
 
-export type InsertQuestion = Action<
-  Actions.INSERT_QUESTION,
-  QuestionData
->
+export type InsertQuestion = Action<Actions.INSERT_QUESTION, QuestionData>;
 
-export type UpdateQuestion = Action<
-  Actions.UPDATE_QUESTION,
-  QuestionData
->
+export type UpdateQuestion = Action<Actions.UPDATE_QUESTION, QuestionData>;
 
 export type InsertAnswerOptions = Action<
   Actions.INSERT_ANSWER_OPTIONS,
   AnswerOptionsData
->
+>;
 
 export type UpdateAnswerOptions = Action<
   Actions.UPDATE_ANSWER_OPTIONS,
   AnswerOptionsData
->
+>;
 
 export type RemoveAnswerOptions = Action<
   Actions.REMOVE_ANSWER_OPTIONS,
   AnswerOptionsData
->
+>;
 
-export type QuestionAction = 
-  InsertQuestion |
-  UpdateQuestion |
-  InsertAnswerOptions |
-  UpdateAnswerOptions |
-  RemoveAnswerOptions;
+export type QuestionAction =
+  | InsertQuestion
+  | UpdateQuestion
+  | InsertAnswerOptions
+  | UpdateAnswerOptions
+  | RemoveAnswerOptions;
 
-export type Handle = (command: QuestionCommand, question?: Question.t) => Action[];
+/**
+ * The command handler type
+ * it takes a command and an optional current question state
+ * and returns a list of decided actions to be made
+ */
+export type Handle = (
+  command: QuestionCommand,
+  question?: Question.t
+) => Action[];
 
+/**
+ * Using specifications to make a decision
+ * a spec is made of a predicate function that check if a decision should be taken
+ * and a factory function that returns the action with its data
+ */
 type Spec = {
   isSatisfiedBy: (
     updatedQuestion: Question.t,
@@ -109,17 +124,17 @@ type Spec = {
 };
 
 const updateQuestionSpec: Spec = {
-    isSatisfiedBy: (updatedQuestion, newQuestion) =>
-      updatedQuestion.id === newQuestion.id &&
-      updatedQuestion.prompt !== newQuestion.prompt,
-    action: (newQuestion) => ({
-      name: Actions.UPDATE_QUESTION,
-      data: {
-        id: newQuestion.id,
-        prompt: newQuestion.prompt,
-        answerOptions: newQuestion.answerOptions
-      }
-    }),
+  isSatisfiedBy: (updatedQuestion, newQuestion) =>
+    updatedQuestion.id === newQuestion.id &&
+    updatedQuestion.prompt !== newQuestion.prompt,
+  action: (newQuestion) => ({
+    name: Actions.UPDATE_QUESTION,
+    data: {
+      id: newQuestion.id,
+      prompt: newQuestion.prompt,
+      answerOptions: newQuestion.answerOptions,
+    },
+  }),
 };
 
 const insertAnswerOptionsSpec: Spec = {
@@ -129,8 +144,8 @@ const insertAnswerOptionsSpec: Spec = {
     name: Actions.INSERT_ANSWER_OPTIONS,
     data: {
       questionId: newQuestion.id,
-      answerOptions: addedAnswerOptions
-    }
+      answerOptions: addedAnswerOptions,
+    },
   }),
 };
 
@@ -139,8 +154,8 @@ const removeAnswerOptionsSpec: Spec = {
     updatedQuestion.id === newQuestion.id && removedAnswerOptions.length > 0,
   action: (newQuestion, _, removedAnswerOptions) => ({
     name: Actions.REMOVE_ANSWER_OPTIONS,
-    data: {questionId: newQuestion.id, answerOptions: removedAnswerOptions}
-  })
+    data: { questionId: newQuestion.id, answerOptions: removedAnswerOptions },
+  }),
 };
 
 const updateAnswerOptionsSpec: Spec = {
@@ -150,16 +165,15 @@ const updateAnswerOptionsSpec: Spec = {
     ___,
     ____,
     updatedAnswerOptions
-  ) =>
-    updatedQuestion.id === newQuestion.id && updatedAnswerOptions.length > 0,
+  ) => updatedQuestion.id === newQuestion.id && updatedAnswerOptions.length > 0,
   action: (newQuestion, _, __, updatedAnswerOptions) => ({
     name: Actions.UPDATE_ANSWER_OPTIONS,
     data: {
       questionId: newQuestion.id,
-      answerOptions: updatedAnswerOptions
-    }
+      answerOptions: updatedAnswerOptions,
+    },
   }),
-}
+};
 
 const specs: Spec[] = [
   updateQuestionSpec,
@@ -168,16 +182,19 @@ const specs: Spec[] = [
   updateAnswerOptionsSpec,
 ];
 
+/**
+ * The domain model
+ */
 export namespace Question {
   export type t = {
     id: QuestionId.t;
     prompt: string;
-    answerOptions: AnswerOption.t[]
-  }
+    answerOptions: AnswerOption.t[];
+  };
 }
 
 export namespace QuestionId {
-  export type t = string
+  export type t = string;
 }
 
 export namespace AnswerOption {
@@ -185,10 +202,20 @@ export namespace AnswerOption {
     id: string;
     answer: string;
     correct: boolean;
-  }
+  };
 }
 
-export const handle: Handle = (command: QuestionCommand, question?: Question.t) => {
+/**
+ * Handle type implementation
+ *
+ * @param command
+ * @param question
+ * @returns Array
+ */
+export const handle: Handle = (
+  command: QuestionCommand,
+  question?: Question.t
+) => {
   if (command.name === Commands.CREATE_QUESTION) {
     return handleCreateQuestion(command);
   }
@@ -196,41 +223,59 @@ export const handle: Handle = (command: QuestionCommand, question?: Question.t) 
   if (question) {
     return handleUpdateQuestion(command, question);
   }
-  
-  throw new Error("can not process the command");
-}
 
-const handleCreateQuestion = (command: CreateQuestionCommand): QuestionAction[] => {
+  throw new Error('can not process the command');
+};
+
+/**
+ * Private function to handle create question command
+ * @param command
+ * @returns
+ */
+const handleCreateQuestion = (
+  command: CreateQuestionCommand
+): QuestionAction[] => {
   const question: Question.t = {
     id: command.data.id as QuestionId.t,
     prompt: command.data.prompt,
-    answerOptions: command.data.answerOptions
-  }
+    answerOptions: command.data.answerOptions,
+  };
 
   const insertQuestionAction: InsertQuestion = {
     name: Actions.INSERT_QUESTION,
     data: {
       id: question.id,
       prompt: question.prompt,
-      answerOptions: question.answerOptions
-    }
-  }
+      answerOptions: question.answerOptions,
+    },
+  };
 
-  const answerOptionsData = {questionId: question.id, answerOptions: question.answerOptions}
+  const answerOptionsData = {
+    questionId: question.id,
+    answerOptions: question.answerOptions,
+  };
   const insertAnswerOptionsAction: InsertAnswerOptions = {
     name: Actions.INSERT_ANSWER_OPTIONS,
-    data: answerOptionsData
-  }
+    data: answerOptionsData,
+  };
   return [insertQuestionAction, insertAnswerOptionsAction];
-}
+};
 
-
-const handleUpdateQuestion = (command: UpdateQuestionCommand, updatedQuestion: Question.t): QuestionAction[] => {
+/**
+ * Private function to handle update question command
+ * @param command
+ * @param updatedQuestion
+ * @returns Array
+ */
+const handleUpdateQuestion = (
+  command: UpdateQuestionCommand,
+  updatedQuestion: Question.t
+): QuestionAction[] => {
   const newQuestion: Question.t = {
     id: command.data.id as QuestionId.t,
     prompt: command.data.prompt,
-    answerOptions: command.data.answerOptions
-  }
+    answerOptions: command.data.answerOptions,
+  };
 
   const oldKeys = new Set(updatedQuestion.answerOptions.map((a) => a.id));
   const newKeys = new Set(newQuestion.answerOptions.map((a) => a.id));
@@ -272,4 +317,4 @@ const handleUpdateQuestion = (command: UpdateQuestionCommand, updatedQuestion: Q
     }
     return actions;
   }, [] as QuestionAction[]);
-}
+};

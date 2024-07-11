@@ -1,13 +1,13 @@
-import { Hono } from "hono";
-import { questions } from "./routes";
-import {Database} from "bun:sqlite"
+import { Hono } from 'hono';
+import { questions } from './routes';
+import { Database } from 'bun:sqlite';
 
 type Bindings = {
-  db: Database
-}
+  db: Database;
+};
 
-const app = new Hono<{Bindings: Bindings}>()
+const app = new Hono<{ Bindings: Bindings }>();
 
-app.route("/questions", questions)
+app.route('/questions', questions);
 
 export default app;
