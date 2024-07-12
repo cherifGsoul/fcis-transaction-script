@@ -9,7 +9,7 @@ export const db = new Database('quizr.db');
 
 export const drzleDb = drizzle(db);
 
-interface KDatabase {
+export interface KDatabase {
   questions: Kyselify<typeof questions>;
   answerOptions: Kyselify<typeof answerOptions>;
 }

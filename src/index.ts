@@ -1,13 +1,16 @@
 import { Hono } from 'hono';
 import { questions } from './routes';
-import { Database } from 'bun:sqlite';
+import identityAccess from './identityaccess/routes';
+import { Kysely } from 'kysely';
+import { KDatabase } from './config/db';
 
 type Bindings = {
-  db: Database;
+  db: Kysely<KDatabase>;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.route('/questions', questions);
+app.route('/', identityAccess);
 
 export default app;
