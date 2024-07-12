@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { questions } from './routes';
+import { questions } from './quiz-catalog/routes';
 import identityAccess from './identityaccess/routes';
 import { Kysely } from 'kysely';
 import { KDatabase } from './config/db';

@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import { validator } from 'hono/validator';
-import { handleGetQuestion, handleQuestionCommand } from '../../quiz-catalog';
+import { handleGetQuestion, handleQuestionCommand } from '../..';
 import type {
   CreateQuestionCommand,
   UpdateQuestionCommand,
-} from '../../quiz-catalog';
-import { Commands } from '../../quiz-catalog';
+} from '../..';
+import { Commands } from '../..';
 import { z } from 'zod';
-import { AnswerOptionData } from '../../quiz-catalog/question/core';
+import { AnswerOptionData } from '../../question/core';
 
 const questions = new Hono();
 
