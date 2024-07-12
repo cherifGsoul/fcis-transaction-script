@@ -42,7 +42,9 @@ identityAccess.post(
   }),
   async (c) => {
     const formData = c.req.valid('form');
-    console.log(formData)
+    /**
+     * @todo handle sign in
+     */
     return c.html(
       <SignIn
         data={undefined}

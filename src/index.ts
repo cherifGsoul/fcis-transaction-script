@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { csrf } from 'hono/csrf';
 import { questions } from './quiz-catalog/routes';
 import identityAccess from './identityaccess/routes';
 import { Kysely } from 'kysely';
@@ -9,6 +10,8 @@ type Bindings = {
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+app.use(csrf());
 
 app.route('/questions', questions);
 app.route('/', identityAccess);
